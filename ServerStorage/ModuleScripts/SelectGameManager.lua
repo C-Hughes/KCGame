@@ -7,18 +7,18 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- Module Scripts
 local moduleScripts = ServerStorage:WaitForChild("ModuleScripts")
-local displayManager = require(moduleScripts:WaitForChild("DisplayManager"))
---local playerManager = require(moduleScripts:WaitForChild("PlayerManager"))
+local gameSettings = require(moduleScripts:WaitForChild("GameSettings"))
 
 --Variables
 SelectGameManager.gameSelected = ""
 SelectGameManager.gameSelectedTPPoint = ""
+SelectGameManager.gameWinType = ""
 
 --Select Random Game
 function SelectGameManager.selectNextGame()
 
-	local gameSelectionGen = math.random(1,2)
-	--local gameSelectionGen = 1
+	--local gameSelectionGen = math.random(1,6)
+	local gameSelectionGen = 6
 	
 	if(gameSelectionGen == 1)
 	then
@@ -26,6 +26,8 @@ function SelectGameManager.selectNextGame()
 		print("Next Game is BlockParty" )
 		SelectGameManager.gameSelected = "BlockParty"
 		SelectGameManager.gameSelectedTPPoint = "BlockPartySpawners"
+		SelectGameManager.gameWinType = "LastManStanding"
+		gameSettings.matchDuration = 300
 
 	elseif( gameSelectionGen == 2 )
 	then   
@@ -40,6 +42,34 @@ function SelectGameManager.selectNextGame()
 		print("Next Game is FallDown" )
 		SelectGameManager.gameSelected = "FallDown"
 		SelectGameManager.gameSelectedTPPoint = "FallDownSpawners"
+		SelectGameManager.gameWinType = "LastManStanding"
+		gameSettings.matchDuration = 300
+		
+	elseif( gameSelectionGen == 4 )
+	then
+		--FallDown
+		print("Next Game is DizzyHeights" )
+		SelectGameManager.gameSelected = "DizzyHeights"
+		SelectGameManager.gameSelectedTPPoint = "DizzyHeightsSpawners"
+		gameSettings.matchDuration = 60
+		
+	elseif( gameSelectionGen == 5 )
+	then
+		--FallDown
+		print("Next Game is DoorDash" )
+		SelectGameManager.gameSelected = "DoorDash"
+		SelectGameManager.gameSelectedTPPoint = "DoorDashSpawners"
+		SelectGameManager.gameWinType = "MaxFinished"
+		gameSettings.matchDuration = 120
+		
+	elseif( gameSelectionGen == 6 )
+	then
+		--FallDown
+		print("Next Game is CastleRun" )
+		SelectGameManager.gameSelected = "CastleRun"
+		SelectGameManager.gameSelectedTPPoint = "CastleRunSpawners"
+		SelectGameManager.gameWinType = "MaxFinished"
+		gameSettings.matchDuration = 120
 
 	else
 		--DefaultGame
@@ -48,7 +78,6 @@ function SelectGameManager.selectNextGame()
 		SelectGameManager.gameSelectedTPPoint = "CannonBallRunSpawners"
 
 	end
-	displayManager.updateStatus("Next game is... "..SelectGameManager.gameSelected)
 end
 
 
