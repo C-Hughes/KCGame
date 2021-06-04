@@ -7,10 +7,13 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 -- Module Scripts
 local moduleScripts = ServerStorage:WaitForChild("ModuleScripts")
 local playerManager = require(moduleScripts:WaitForChild("PlayerManager"))
+local SelectGameManager = require(moduleScripts:WaitForChild("SelectGameManager"))
 local StartGameManager = require(moduleScripts:WaitForChild("StartGameManager"))
+local ResetGameManager = require(moduleScripts:WaitForChild("ResetGameManager"))
 local gameSettings = require(moduleScripts:WaitForChild("GameSettings"))
 local timer = require(moduleScripts:WaitForChild("Timer"))
 local displayManager = require(moduleScripts:WaitForChild("DisplayManager"))
+
 
 -- Events
 local events = ServerStorage:WaitForChild("Events")
@@ -51,9 +54,22 @@ end
 
 -- Module Functions
 function MatchManager.prepareGame()
-	playerManager.sendPlayersToMatch()
 	--Freeze Player
 	playerManager.freezePlayers()
+	
+	--Display Match Loading Screen
+	displayManager.gameLoadingGUI(SelectGameManager.gameSelected)
+	playerManager.sendPlayersToMatch()
+
+	--Remove Match Loading Screen
+	wait(5)
+	displayManager.gameLoadingGUI(SelectGameManager.gameSelected)
+	
+	--Play Match Cut Scene
+	displayManager.gameCutScene(SelectGameManager.gameSelected, 8)
+	wait(8)
+	
+	--Start the Countdown
 	displayManager.startCountdown()
 	--UnFreeze Player
 	playerManager.unFreezePlayers()
@@ -69,6 +85,8 @@ function MatchManager.getEndStatus(endState)
 	if endState == gameSettings.endStates.FoundWinner then
 		local winnerName = playerManager.getWinnerName()
 		statusToReturn = "Winner is : " .. winnerName
+	elseif endState == gameSettings.endStates.MaxFinished then
+		statusToReturn = "Maximum Players Finished!"
 	elseif endState == gameSettings.endStates.TimerUp then
 		statusToReturn = "Time ran out!"
 	else
@@ -79,12 +97,12 @@ function MatchManager.getEndStatus(endState)
 end
 
 function MatchManager.cleanupMatch()
-	--playerManager.removeAllWeapons()
 	print("CLEANUP")
+	ResetGameManager.resetSelectedGame()
 end
 
 function MatchManager.resetMatch()
-	playerManager.resetPlayers()
+	playerManager.resetPlayers()	
 end
 
 matchStart.Event:Connect(startTimer)
