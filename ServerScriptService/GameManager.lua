@@ -14,7 +14,9 @@ local events = ServerStorage:WaitForChild("Events")
 local matchEnd = events:WaitForChild("MatchEnd")
 
 
-_G.startNewLobby = function ()
+_G.TEST = function ()
+	print("STARTING GAME")
+	
 	while true do
 				
 		repeat
@@ -26,6 +28,7 @@ _G.startNewLobby = function ()
 		print("Intermission over")
 		--SELECT THE NEXT GAME
 		SelectGameManager.selectNextGame()
+		displayManager.updateStatus("Next game is... "..SelectGameManager.gameSelected)
 		wait(gameSettings.transitionTime)
 		displayManager.updateStatus("Get ready!")
 		
@@ -36,9 +39,11 @@ _G.startNewLobby = function ()
 		local endStatus = matchManager.getEndStatus(endState)
 		displayManager.updateStatus(endStatus)
 		
-		matchManager.cleanupMatch()
-		wait(gameSettings.transitionTime)
+		displayManager.hideGameStatusGUI() --Clear Match playercount/timer gui
 		
+		wait(gameSettings.transitionTime)
 		matchManager.resetMatch()
+		
+		matchManager.cleanupMatch()
 	end
 end
