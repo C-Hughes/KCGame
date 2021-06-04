@@ -10,7 +10,8 @@ GameSettings.transitionTime = 5
 -- Possible ways that the game can end.
 GameSettings.endStates = {
 	TimerUp = "TimerUp",
-	FoundWinner = "FoundWinner"
+	FoundWinner = "FoundWinner",
+	MaxFinished = "MaxPlayersFinished"
 }
 
 return GameSettings
