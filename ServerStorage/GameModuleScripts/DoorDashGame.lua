@@ -1,4 +1,13 @@
 local DoorDashGame = {}
+
+-- Services
+local ServerStorage = game:GetService("ServerStorage")
+
+-- Module Scripts
+local moduleScripts = ServerStorage:WaitForChild("ModuleScripts")
+local playerManager = require(moduleScripts:WaitForChild("PlayerManager"))
+
+
 DoorDashGame.__index = DoorDashGame
 
 --Module Variables
@@ -23,7 +32,6 @@ local RandomNumber3 = 0
 
 function generateRandomNum(Num, i)
 	RandomNumber1 = math.random(1,3)
-	print("Num1= ".. RandomNumber1)
 	
 	if Num == 2 or Num == 3 then
 		local Generate = true
@@ -32,7 +40,6 @@ function generateRandomNum(Num, i)
 			--If RandomNumber2 && RandomNumber1 are not the same, then break
 			if RandomNumber2 ~= RandomNumber1 then
 				Generate = false
-				print("Num2= ".. RandomNumber2)
 			end
 		end
 		if Num == 3 then
@@ -42,33 +49,29 @@ function generateRandomNum(Num, i)
 				--If RandomNumber3 && RandomNumber1 are not the same, then break
 				if RandomNumber3 ~= RandomNumber1 then
 					Generate3 = false
-					print("Num3= ".. RandomNumber3)
 				end
 			end
 		end
 	end
 end
 
-
 function setDoors()
-
-	-- loop over the door groups and set some to anchored
+	-- loop over the door groups and set some to unAnchored
 	local doorGroups = game.Workspace.DoorDashGroups:GetChildren()
 	
 	for i, doorGroup in ipairs(doorGroups) do
 		
 		local thisDoorGroup = doorGroup:GetChildren()
 		print("DoorGroup "..doorGroup.Name)
-		print(#thisDoorGroup)
 		
 		if i == 6 then
-			--Generate 3 Ransom Numbers
+			--Generate 3 Random Numbers
 			generateRandomNum(3, #thisDoorGroup)
 		elseif i==7 or i==5 or i==4 or i==3 then
-			--Generate 2 Ransom Numbers
+			--Generate 2 Random Numbers
 			generateRandomNum(2, #thisDoorGroup)
 		else
-			--Generate 1 Ransom Number
+			--Generate 1 Random Number
 			generateRandomNum(1, #thisDoorGroup)
 		end
 		
@@ -110,16 +113,33 @@ function setDoors()
 end
 
 function DoorDashGame.reset()
-	
 	local model = game.Workspace.DoorDashGroups
 	model:Destroy()
 	wait(0.5)
 	local lclone = DoorDashGame.clone:Clone()
 	lclone.Parent = Workspace
 	model = lclone
-	
 end
 
+-- Finish Line
+game.Workspace.DoorDashFinish.Touched:Connect(function(hit)
+	if game.Players:GetPlayerFromCharacter(hit.Parent) then
+		local player = game.Players:GetPlayerFromCharacter(hit.Parent)
+		playerManager.playerCrossedFinish(player)
+		
+		--[[
+		--Make Invisible
+		playerManager.makePlayerInvisible(player)
+		--Teleport to Finish
+		playerManager.teleportToFinish(player)
+		--Add Player to FinishedPlayer array
+		playerManager.addFinishedPlayer(player)
+		--Remove from ActivePlayers array
+		playerManager.removeActivePlayer(player)
+		--Show spectateGUI
+		game.ReplicatedStorage.ShowSpectateGUI:FireClient(player, playerManager.activePlayers)]]
+	end
+end)
 
 function DoorDashGame:start()
 	setDoors()
