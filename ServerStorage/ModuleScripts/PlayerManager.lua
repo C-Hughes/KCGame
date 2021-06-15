@@ -17,8 +17,9 @@ local events = ServerStorage:WaitForChild("Events")
 local matchEnd = events:WaitForChild("MatchEnd")
 
 
--- Map Variables
+-- Variables
 local lobbySpawn = workspace.StartSpawn
+local winningPlayer
 
 -- Values
 local displayValues = ReplicatedStorage:WaitForChild("DisplayValues")
@@ -27,6 +28,7 @@ local playersLeft = displayValues:WaitForChild("PlayersLeft")
 -- Player Variables
 PlayerManager.activePlayers = {}
 PlayerManager.finishedPlayers = {}
+PlayerManager.eliminatedPlayers = {}
 PlayerManager.maxPlayersThatCanFinish = 0
 PlayerManager.playersWithScores = {}
 PlayerManager.playerScores = {}
@@ -86,6 +88,12 @@ function PlayerManager.removeActivePlayer(player)
 			print("Remove Active Player!")
 			updateActivePlayersEvent:FireAllClients(PlayerManager.activePlayers)
 			print("Updating active player list....")
+			--If WinType is LastManStanding, add eliminated player to eliminated player list.
+			if SelectGameManager.gameWinType == "LastManStanding" then
+				if winningPlayer ~= whichPlayer then
+					table.insert(PlayerManager.eliminatedPlayers,whichPlayer)
+				end
+			end
 		end
 	end
 end
@@ -110,61 +118,119 @@ function PlayerManager.addFinishedPlayer(player)
 end
 
 local function addScoreToPlayers()	
-	--Get Total number of players to give score to
-	local numFinished = #PlayerManager.finishedPlayers
-		
-	--Winner get 50 Points
-	--Top 20% (0.2) 35 Points
-	--Top 50% (0.5) 20 Points
-	--Rest of Finished Players 10 Points
-	--Any active players get 2 points.
-	
-	local top20 = math.ceil((numFinished * 0.2) - 1)
-	local top50 = math.ceil((numFinished * 0.5) - top20)
-	
-	local stats = PlayerManager.finishedPlayers[1]:FindFirstChild("leaderstats")
-	local score = stats:FindFirstChild("Score")
-	score.Value = score.Value + 50
-	
-	table.insert(PlayerManager.playersWithScores,PlayerManager.finishedPlayers[1])
-	table.insert(PlayerManager.playerScores,"50")
-	
-	--Top 20%
-	for i = 1,top20,1  do 
-		local stats = PlayerManager.finishedPlayers[i+1]:FindFirstChild("leaderstats")
+	--Give scores depending on 
+	if SelectGameManager.gameWinType == "MaxFinished" then
+			--Get Total number of players to give score to
+		local numFinished = #PlayerManager.finishedPlayers
+		if numFinished > 0 then
+			--Winner get 50 Points
+			--Top 20% (0.2) 35 Points
+			--Top 50% (0.5) 20 Points
+			--Rest of Finished Players 10 Points
+			--Any active players get 2 points.
+
+			local top20 = math.ceil((numFinished * 0.2) - 1)
+			local top50 = math.ceil((numFinished * 0.5) - top20)
+
+			local stats = PlayerManager.finishedPlayers[1]:FindFirstChild("leaderstats")
+			local score = stats:FindFirstChild("Score")
+			score.Value = score.Value + 50
+
+			table.insert(PlayerManager.playersWithScores,PlayerManager.finishedPlayers[1])
+			table.insert(PlayerManager.playerScores,"50")
+			
+			if numFinished > 1 then
+				--Top 20%
+				for i = 1,top20,1  do 
+					local stats = PlayerManager.finishedPlayers[i+1]:FindFirstChild("leaderstats")
+					local score = stats:FindFirstChild("Score")
+					score.Value = score.Value + 35 
+
+					table.insert(PlayerManager.playersWithScores,PlayerManager.finishedPlayers[i+1])
+					table.insert(PlayerManager.playerScores,"35")
+				end
+				--Top 50%
+				for i = 1,top50,1  do 
+					local stats = PlayerManager.finishedPlayers[i+1+top20]:FindFirstChild("leaderstats")
+					local score = stats:FindFirstChild("Score")
+					score.Value = score.Value + 20 
+
+					table.insert(PlayerManager.playersWithScores,PlayerManager.finishedPlayers[i+1+top20])
+					table.insert(PlayerManager.playerScores,"20")
+				end
+				--Rest
+				for i = 2+top20+top50,numFinished,1  do 
+					local stats = PlayerManager.finishedPlayers[i]:FindFirstChild("leaderstats")
+					local score = stats:FindFirstChild("Score")
+					score.Value = score.Value + 10 
+
+					table.insert(PlayerManager.playersWithScores,PlayerManager.finishedPlayers[i])
+					table.insert(PlayerManager.playerScores,"10")
+				end	
+			end
+		end
+			
+		if #PlayerManager.activePlayers > 0 then
+			--Give 2 points to all active players
+			for playerKey, whichPlayer in pairs(PlayerManager.activePlayers) do
+				local stats = whichPlayer:FindFirstChild("leaderstats")
+				local score = stats:FindFirstChild("Score")
+				score.Value = score.Value + 2
+				
+				table.insert(PlayerManager.playersWithScores,whichPlayer)
+				table.insert(PlayerManager.playerScores,"2")
+			end
+		end
+	else
+		--Scoring for LastManStanding Games
+		local stats = winningPlayer:FindFirstChild("leaderstats")
 		local score = stats:FindFirstChild("Score")
-		score.Value = score.Value + 35 
+		score.Value = score.Value + 50
 		
-		table.insert(PlayerManager.playersWithScores,PlayerManager.finishedPlayers[i+1])
-		table.insert(PlayerManager.playerScores,"35")
-	end
-	--Top 50%
-	for i = 1,top50,1  do 
-		local stats = PlayerManager.finishedPlayers[i+1+top20]:FindFirstChild("leaderstats")
-		local score = stats:FindFirstChild("Score")
-		score.Value = score.Value + 20 
+		table.insert(PlayerManager.playersWithScores,winningPlayer)
+		table.insert(PlayerManager.playerScores,"50")
 		
-		table.insert(PlayerManager.playersWithScores,PlayerManager.finishedPlayers[i+1+top20])
-		table.insert(PlayerManager.playerScores,"20")
-	end
-	--Rest
-	for i = 2+top20+top50,numFinished,1  do 
-		local stats = PlayerManager.finishedPlayers[i]:FindFirstChild("leaderstats")
-		local score = stats:FindFirstChild("Score")
-		score.Value = score.Value + 10 
-		
-		table.insert(PlayerManager.playersWithScores,PlayerManager.finishedPlayers[i])
-		table.insert(PlayerManager.playerScores,"10")
-	end	
-	
-	--Give 2 points to all active players
-	for playerKey, whichPlayer in pairs(PlayerManager.activePlayers) do
-		local stats = whichPlayer:FindFirstChild("leaderstats")
-		local score = stats:FindFirstChild("Score")
-		score.Value = score.Value + 2
-		
-		table.insert(PlayerManager.playersWithScores,whichPlayer)
-		table.insert(PlayerManager.playerScores,"2")
+		if #PlayerManager.eliminatedPlayers > 0 then
+			local pointsToGive
+			--Give 2 points to all eliminated players
+			if #PlayerManager.eliminatedPlayers > 20 then
+				pointsToGive = 20
+			else
+				pointsToGive = 10
+			end
+			
+			for index = #PlayerManager.eliminatedPlayers, 1, -1 do
+				
+				local stats = PlayerManager.eliminatedPlayers[index]:FindFirstChild("leaderstats")
+				local score = stats:FindFirstChild("Score")
+				score.Value = score.Value + pointsToGive
+				
+				table.insert(PlayerManager.playersWithScores,PlayerManager.eliminatedPlayers[index])
+				table.insert(PlayerManager.playerScores,pointsToGive)
+				
+				pointsToGive = pointsToGive-2
+				if pointsToGive < 2 then
+					pointsToGive = 2
+				end
+			end
+			--[[
+			for playerKey, whichPlayer in pairs(PlayerManager.eliminatedPlayers) do
+				
+				local stats = whichPlayer:FindFirstChild("leaderstats")
+				local score = stats:FindFirstChild("Score")
+				score.Value = score.Value + pointsToGive
+
+				table.insert(PlayerManager.playersWithScores,whichPlayer)
+				table.insert(PlayerManager.playerScores,pointsToGive)
+				
+				if #PlayerManager.eliminatedPlayers > 20 then
+					pointsToGive = pointsToGive+1
+				elseif pointsToGive < 20 then
+					pointsToGive = pointsToGive+2
+				end
+			end
+			]]
+		end
 	end
 end
 
@@ -175,10 +241,13 @@ local function preparePlayer(player, whichSpawn)
 	local character = player.Character or player.CharacterAdded:Wait()
 	local humanoid = character:WaitForChild("Humanoid")
 	
-	humanoid.Died:Connect(function()
-		respawnPlayerInLobby(player)
-		PlayerManager.removeActivePlayer(player)
-	end)
+	if SelectGameManager.gameWinType == "LastManStanding" then
+		humanoid.Died:Connect(function()
+			respawnPlayerInLobby(player)
+			PlayerManager.removeActivePlayer(player)
+		end)
+	end
+	
 end
 
 function PlayerManager.sendPlayersToMatch()
@@ -206,7 +275,8 @@ end
 
 function PlayerManager.getWinnerName()
 	if PlayerManager.activePlayers[1] then
-		local winningPlayer = PlayerManager.activePlayers[1]
+		winningPlayer = PlayerManager.activePlayers[1]
+		addPlayerWin(winningPlayer)
 		return winningPlayer.Name
 	else
 		return "Error: No winning player found"
@@ -242,6 +312,7 @@ function PlayerManager.resetPlayers()
 	
 	PlayerManager.activePlayers = {}
 	PlayerManager.finishedPlayers = {}
+	PlayerManager.eliminatedPlayers = {}
 	PlayerManager.playersWithScores = {}
 	PlayerManager.playerScores = {}
 end
