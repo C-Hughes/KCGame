@@ -11,6 +11,8 @@ local BallRunGame = require(gameModuleScripts:WaitForChild("BallRunGame"))
 local BlockPartyGame = require(gameModuleScripts:WaitForChild("BlockPartyGame"))
 local DoorDashGame = require(gameModuleScripts:WaitForChild("DoorDashGame"))
 local CastleRunGame = require(gameModuleScripts:WaitForChild("CastleRunGame"))
+local DropDownGame = require(gameModuleScripts:WaitForChild("DropDownGame"))
+local DuckAndDiveGame = require(gameModuleScripts:WaitForChild("DuckAndDiveGame"))
 
 -- Events
 local events = ServerStorage:WaitForChild("Events")
@@ -26,6 +28,8 @@ local myBallRunGame = BallRunGame.new()
 local myBlockPartyGame = BlockPartyGame.new()
 local myDoorDashGame = DoorDashGame.new()
 local myCastleRunGame = CastleRunGame.new()
+local myDropDownGame = DropDownGame.new()
+local myDuckAndDiveGame = DuckAndDiveGame.new()
 
 -- Local Functions
 
@@ -43,9 +47,10 @@ function StartGameManager.startSelectedGame()
 		print("Starting CannonBallRun" )
 		myBallRunGame:start()
 
-	elseif( SelectGameManager.gameSelected == "FallDown" )
+	elseif( SelectGameManager.gameSelected == "DropDown" )
 	then
-		print("Starting FallDown" )
+		print("Starting DropDown" )
+		myDropDownGame:start()
 
 	elseif( SelectGameManager.gameSelected == "DizzyHeights" )
 	then
@@ -60,6 +65,11 @@ function StartGameManager.startSelectedGame()
 	then
 		print("Starting CastleRun" )
 		myCastleRunGame:start()
+		
+	elseif( SelectGameManager.gameSelected == "DuckAndDive" )
+	then
+		print("Starting DuckAndDive" )
+		myDuckAndDiveGame:start()
 
 	else
 		print("START DEFAULT GAME" )
@@ -74,18 +84,21 @@ function StartGameManager.stopCurrentGame()
 	elseif( SelectGameManager.gameSelected == "CannonBallRun" )
 	then   
 		myBallRunGame:stop()
-	elseif( SelectGameManager.gameSelected == "FallDown" )
+	elseif( SelectGameManager.gameSelected == "DropDown" )
 	then
 		
 	elseif( SelectGameManager.gameSelected == "DizzyHeights" )
 	then
-
+		
+	elseif( SelectGameManager.gameSelected == "CastleRun" )
+	then
+		myCastleRunGame:stop()
+		
+	elseif( SelectGameManager.gameSelected == "DuckAndDive" )
+	then
+		myDuckAndDiveGame:stop()
 	end
 end
 
-
-
---ballRunGameStart.Event:Connect(startBallRunGame)
---ballRunGameEnd.Event:Connect(stopBallRunGame)
 
 return StartGameManager
