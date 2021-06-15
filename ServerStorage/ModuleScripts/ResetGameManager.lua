@@ -12,10 +12,8 @@ local BallRunGame = require(gameModuleScripts:WaitForChild("BallRunGame"))
 local BlockPartyGame = require(gameModuleScripts:WaitForChild("BlockPartyGame"))
 local DoorDashGame = require(gameModuleScripts:WaitForChild("DoorDashGame"))
 local CastleRunGame = require(gameModuleScripts:WaitForChild("CastleRunGame"))
-
-
-
-
+local DropDownGame = require(gameModuleScripts:WaitForChild("DropDownGame"))
+local DuckAndDiveGame = require(gameModuleScripts:WaitForChild("DuckAndDiveGame"))
 
 
 ------------- Module Functions  ------------
@@ -30,9 +28,10 @@ function ResetGameManager.resetSelectedGame()
 	then   
 		print("Reset CannonBallRun" )
 
-	elseif( SelectGameManager.gameSelected == "FallDown" )
+	elseif( SelectGameManager.gameSelected == "DropDown" )
 	then
-		print("Reset FallDown" )
+		print("Reset DropDownGame" )
+		DropDownGame.reset()
 
 	elseif( SelectGameManager.gameSelected == "DizzyHeights" )
 	then
@@ -47,6 +46,11 @@ function ResetGameManager.resetSelectedGame()
 	then
 		print("Reset CastleRun" )
 		CastleRunGame.reset()
+		
+	elseif( SelectGameManager.gameSelected == "DuckAndDive" )
+	then
+		print("Reset DuckAndDive" )
+		DuckAndDiveGame.reset()
 	else
 		print("Reset DEFAULT GAME" )
 	end
