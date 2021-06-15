@@ -13,63 +13,75 @@ local gameSettings = require(moduleScripts:WaitForChild("GameSettings"))
 SelectGameManager.gameSelected = ""
 SelectGameManager.gameSelectedTPPoint = ""
 SelectGameManager.gameWinType = ""
+local PreviousGames = {"DoorDash"}
+local selectedMap = ""
 
---Select Random Game
-function SelectGameManager.selectNextGame()
 
-	--local gameSelectionGen = math.random(1,6)
-	local gameSelectionGen = 6
-	
+local function selectUnique()
+	--local gameSelectionGen = math.random(5,6)
+	local gameSelectionGen = 7
+
 	if(gameSelectionGen == 1)
 	then
 		--BlockParty
 		print("Next Game is BlockParty" )
-		SelectGameManager.gameSelected = "BlockParty"
+		selectedMap = "BlockParty"
 		SelectGameManager.gameSelectedTPPoint = "BlockPartySpawners"
 		SelectGameManager.gameWinType = "LastManStanding"
-		gameSettings.matchDuration = 300
+		gameSettings.matchDuration = 120
 
 	elseif( gameSelectionGen == 2 )
 	then   
 		--CannonBallRun
 		print("Next Game is CannonBallRun" )
-		SelectGameManager.gameSelected = "CannonBallRun"
+		selectedMap = "CannonBallRun"
 		SelectGameManager.gameSelectedTPPoint = "CannonBallRunSpawners"
+		SelectGameManager.gameWinType = "MaxFinished"
+		gameSettings.matchDuration = 120
 
 	elseif( gameSelectionGen == 3 )
 	then
 		--FallDown
-		print("Next Game is FallDown" )
-		SelectGameManager.gameSelected = "FallDown"
-		SelectGameManager.gameSelectedTPPoint = "FallDownSpawners"
+		print("Next Game is DropDown" )
+		selectedMap = "DropDown"
+		SelectGameManager.gameSelectedTPPoint = "DropDownSpawners"
 		SelectGameManager.gameWinType = "LastManStanding"
-		gameSettings.matchDuration = 300
-		
+		gameSettings.matchDuration = 120
+
 	elseif( gameSelectionGen == 4 )
 	then
 		--FallDown
 		print("Next Game is DizzyHeights" )
-		SelectGameManager.gameSelected = "DizzyHeights"
+		selectedMap = "DizzyHeights"
 		SelectGameManager.gameSelectedTPPoint = "DizzyHeightsSpawners"
-		gameSettings.matchDuration = 60
-		
+		gameSettings.matchDuration = 120
+
 	elseif( gameSelectionGen == 5 )
 	then
 		--FallDown
 		print("Next Game is DoorDash" )
-		SelectGameManager.gameSelected = "DoorDash"
+		selectedMap = "DoorDash"
 		SelectGameManager.gameSelectedTPPoint = "DoorDashSpawners"
 		SelectGameManager.gameWinType = "MaxFinished"
 		gameSettings.matchDuration = 120
-		
+
 	elseif( gameSelectionGen == 6 )
 	then
 		--FallDown
 		print("Next Game is CastleRun" )
-		SelectGameManager.gameSelected = "CastleRun"
+		selectedMap = "CastleRun"
 		SelectGameManager.gameSelectedTPPoint = "CastleRunSpawners"
 		SelectGameManager.gameWinType = "MaxFinished"
 		gameSettings.matchDuration = 120
+		
+	elseif( gameSelectionGen == 7 )
+	then
+		--FallDown
+		print("Next Game is Duck&Dive" )
+		selectedMap = "DuckAndDive"
+		SelectGameManager.gameSelectedTPPoint = "DuckAndDiveSpawners"
+		SelectGameManager.gameWinType = "LastManStanding"
+		gameSettings.matchDuration = 180
 
 	else
 		--DefaultGame
@@ -77,6 +89,30 @@ function SelectGameManager.selectNextGame()
 		SelectGameManager.gameSelected = "DefaultGame"
 		SelectGameManager.gameSelectedTPPoint = "CannonBallRunSpawners"
 
+	end
+end
+
+--Select Random Game
+function SelectGameManager.selectNextGame()
+	selectUnique()
+	local foundUnique = false
+	while foundUnique == false do
+		foundUnique = true
+		for Map, whichMap in pairs(PreviousGames) do
+			if selectedMap == whichMap then
+				--foundUnique = false
+			end
+		end
+		
+		if foundUnique == true then
+			SelectGameManager.gameSelected = selectedMap
+			table.insert(PreviousGames,selectedMap)
+			if #PreviousGames > 1 then
+				table.remove(PreviousGames,1)
+			end
+		else
+			selectUnique()
+		end 	
 	end
 end
 
